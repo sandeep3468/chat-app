@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 import { Error } from "mongoose";
 import cors from "cors";
 import mongoose from "mongoose";
-import socket from "socket.io";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 import authRoutes from "./routes/authRoutes";
 // import messageRoutes from "./routes/messages";
@@ -14,7 +15,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 const MONGO_URL = process.env.MONGO_URL || "http://localhost";
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
 app.use(express.json());
 
 mongoose
@@ -35,6 +40,18 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 
 app.use(notFound);
 app.use(errorHandle);
-app.listen(3000, () => {
-  console.log("Server is listening on port 3000");
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:5173",
+  },
 });
+
+const onlineUsers = new Map();
+
+io.on("connection", (socket) => {
+  console.log("SOcket Connected!", socket.id);
+});
+
+httpServer.listen(3000);
