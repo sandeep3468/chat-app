@@ -48,10 +48,34 @@ const io = new Server(httpServer, {
   },
 });
 
-const onlineUsers = new Map();
+const onlineUsers = new Set();
 
 io.on("connection", (socket) => {
   console.log("SOcket Connected!", socket.id);
+  onlineUsers.add(socket.id);
+  socket.on("welcome", () => {
+    console.log("Totoal online userse : ", onlineUsers.size);
+  });
+
+  socket.on("sendMessage", ({ userName, message, time }) => {
+    console.log(
+      "Message Received from ",
+      userName,
+      "->",
+      socket.id,
+      message.toString()
+    );
+    // socket.emit("receiveMessage", { username, message, time });
+    socket.to(userName).emit("receiveMessage", { userName, message, time });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket Disconnected!", socket.id);
+    onlineUsers.delete(socket.id);
+  });
 });
 
 httpServer.listen(3000);
+
+const numCPUs = require("os").cpus().length;
+console.log("Number of CPU cores ", numCPUs);

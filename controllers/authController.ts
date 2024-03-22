@@ -49,12 +49,21 @@ const signin = asyncHandler(
 
     const accessToken = user.generateAuthToken();
     const refreshToken = user.generateAuthToken("30d");
-    res.cookie("Authorization", accessToken, { httpOnly: true });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+    // res.cookie("Authorization", accessToken, { httpOnly: true });
+    // res.cookie("refreshToken", refreshToken, { httpOnly: true });
     console.log("Signed in successfully", user);
     res.status(200).json({
       statusCode: 200,
       message: "User signed in successfully",
+      data: {
+        userInfo: {
+          userName: user.userName,
+          email: user.email,
+          role: user.role,
+          accessToken,
+          refreshToken,
+        },
+      },
     });
   }
 );
@@ -67,4 +76,19 @@ const getMe = asyncHandler(
     });
   }
 );
-export { signup, signin, getMe };
+
+const getAllUsers = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const allUsers = await User.find()
+      .select("firstName lastName userName")
+      .lean();
+
+    res.status(200).json({
+      statusCode: 200,
+      message: "Users fetched successfully",
+      data: allUsers,
+    });
+  }
+);
+
+export { signup, signin, getMe, getAllUsers };

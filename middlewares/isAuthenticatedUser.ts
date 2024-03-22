@@ -9,7 +9,7 @@ dotenv.config({ path: "./.env" });
 const isAuthenticatedUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization || req.cookies.Authorization;
-    // console.log("Cookies token", req.cookies.Authorization);
+
     const refreshToken = req.headers?.refreshToken || "";
     if (!token) {
       res.status(401);
