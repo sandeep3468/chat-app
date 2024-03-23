@@ -57,6 +57,8 @@ const signin = asyncHandler(
       message: "User signed in successfully",
       data: {
         userInfo: {
+          firstName: user.firstName,
+          lastName: user.lastName,
           userName: user.userName,
           email: user.email,
           role: user.role,

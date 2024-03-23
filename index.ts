@@ -48,16 +48,17 @@ const io = new Server(httpServer, {
   },
 });
 
-const onlineUsers = new Set();
+const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
-  console.log("SOcket Connected!", socket.id);
-  onlineUsers.add(socket.id);
-  socket.on("welcome", () => {
-    console.log("Totoal online userse : ", onlineUsers.size);
+  console.log("Socket Connected!", socket.id);
+
+  socket.on("welcome", (userName) => {
+    onlineUsers.set(userName, socket.id);
+    console.log("Total online users : ", onlineUsers.size);
   });
 
-  socket.on("sendMessage", ({ userName, message, time }) => {
+  socket.on("sendMessage", ({ userName, message }) => {
     console.log(
       "Message Received from ",
       userName,
@@ -65,8 +66,8 @@ io.on("connection", (socket) => {
       socket.id,
       message.toString()
     );
-    // socket.emit("receiveMessage", { username, message, time });
-    socket.to(userName).emit("receiveMessage", { userName, message, time });
+    console.log(onlineUsers.get(userName));
+    socket.to(onlineUsers.get(userName)).emit("receiveMessage", { message });
   });
 
   socket.on("disconnect", () => {
